@@ -188,6 +188,7 @@ void MotionFlow::motion_tracking(cv::Mat& pre_frame, cv::Mat& next_frame,
 				m_point_record = points_new_temp.size();
 			}
 		}
+
 }
 
 void MotionFlow::cal_feature(){

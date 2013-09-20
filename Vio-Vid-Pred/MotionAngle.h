@@ -24,8 +24,8 @@ public:
 	void motion_angle_feature(const cv::Mat& src, std::vector<double>& ma_feature, bool isPicture);
 
 private:
-	void draw_picture(cv::Mat& dst, const cv::Rect comp_rect, 
-		const cv::Mat& silh, bool isWhole, double angle);
+	void draw_picture(cv::Mat& dst, const cv::Rect comp_rect, const cv::Mat& silh,
+		bool isWhole, double angle);
 	void cal_feature();
 
 private:
@@ -48,4 +48,5 @@ private:
 	cv::Mat	m_segmask; //运动区域图像
 
 	std::vector<cv::Rect> m_storage; //运动组件位置
+
 };

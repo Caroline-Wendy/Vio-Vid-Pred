@@ -37,14 +37,13 @@ MotionAngle::MotionAngle(void){
 
 }
 
-MotionAngle::MotionAngle(const double mhi_duration, 
-	const unsigned int diff_threshold){
+MotionAngle::MotionAngle(const double mhi_duration, const unsigned int diff_threshold){
 
 		const unsigned int buffer_length = 4;
 		const unsigned int last = 0;
 
 		m_buffer_length = buffer_length;
-		m_last = 0;
+		m_last = last;
 
 		m_diff_threshold = diff_threshold;
 		m_mhi_duration = mhi_duration;
@@ -74,6 +73,7 @@ MotionAngle::~MotionAngle(void){
 
 	m_buffer.clear();
 	m_storage.clear();
+
 }
 
 void  MotionAngle::motion_angle_feature(const cv::Mat& src, std::vector<double>& ma_feature, bool isPicture){
@@ -153,6 +153,7 @@ void  MotionAngle::motion_angle_feature(const cv::Mat& src, std::vector<double>&
 	double angle; //角度
 
 	for(int i = -1; i < static_cast<int>(m_storage.size()); i++){
+
 		if(i<0) {
 			comp_rect = cv::Rect( 0, 0, size.width, size.height );
 			isWhole = true;
@@ -191,6 +192,7 @@ void  MotionAngle::motion_angle_feature(const cv::Mat& src, std::vector<double>&
 		if( cv::waitKey(1) >= 0 )
 			return;
 	}
+
 }
 
 void MotionAngle::draw_picture(cv::Mat& dst, const cv::Rect comp_rect, const cv::Mat& silh, bool isWhole, double angle){
@@ -199,7 +201,6 @@ void MotionAngle::draw_picture(cv::Mat& dst, const cv::Rect comp_rect, const cv:
 	double count;
 	cv::Point center;
 	cv::Scalar color;
-
 
 	if(isWhole) {	//整体
 		color = cv::Scalar(255,0,255);
@@ -215,18 +216,18 @@ void MotionAngle::draw_picture(cv::Mat& dst, const cv::Rect comp_rect, const cv:
 	/*计算轮廓点数*/
 	count = cv::norm(silh_roi, NORM_L1); 
 
-
-	// check for the case of little motion
+	/*check for the case of little motion*/
 	if( count < comp_rect.width*comp_rect.height*0.05 )
 		return;
 
-	// draw a clock with arrow indicating the direction
+	/*draw a clock with arrow indicating the direction*/
 	center = cv::Point( (comp_rect.x + comp_rect.width/2), (comp_rect.y + comp_rect.height/2) );
 	cv::Point edge_point = cv::Point(cvRound( center.x + magnitude*cos(angle*CV_PI/180)),
 		cvRound( center.y - magnitude*sin(angle*CV_PI/180)));
 
 	cv::circle( dst, center, static_cast<int>(magnitude*1.2), color, 2, CV_AA, 0 );
 	cv::line( dst, center, edge_point, color, 2, CV_AA, 0 );
+
 }
 
 void MotionAngle::cal_feature(){

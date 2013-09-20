@@ -1,4 +1,4 @@
-// vvp_101.cpp : 定义控制台应用程序的入口点。
+// Vio-Vid-Pred.cpp : 定义控制台应用程序的入口点。
 //
 
 #include "stdafx.h"
@@ -53,6 +53,7 @@ int main(){
 	}
 
 	std::cout << "The program is over! Thank you! " << std::endl;
+
 }
 
 

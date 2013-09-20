@@ -38,4 +38,5 @@ private:
 
 	std::vector<double> m_mf_feature; //运动光流特征
 	std::vector<double> m_flow_vector; //光流向量
+
 };
