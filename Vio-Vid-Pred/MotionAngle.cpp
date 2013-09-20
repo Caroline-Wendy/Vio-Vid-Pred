@@ -39,26 +39,26 @@ MotionAngle::MotionAngle(void){
 
 MotionAngle::MotionAngle(const double mhi_duration, const unsigned int diff_threshold){
 
-		const unsigned int buffer_length = 4;
-		const unsigned int last = 0;
+	const unsigned int buffer_length = 4;
+	const unsigned int last = 0;
 
-		m_buffer_length = buffer_length;
-		m_last = last;
+	m_buffer_length = buffer_length;
+	m_last = last;
 
-		m_diff_threshold = diff_threshold;
-		m_mhi_duration = mhi_duration;
+	m_diff_threshold = diff_threshold;
+	m_mhi_duration = mhi_duration;
 
-		m_src.release();
-		m_dst.release();
-		m_mhi.release();
-		m_orient.release();
-		m_mask.release();
-		m_segmask.release();
+	m_src.release();
+	m_dst.release();
+	m_mhi.release();
+	m_orient.release();
+	m_mask.release();
+	m_segmask.release();
 
-		m_buffer.clear();
-		m_storage.clear();
-		m_angle_vector.clear();
-		m_ma_feature.clear();
+	m_buffer.clear();
+	m_storage.clear();
+	m_angle_vector.clear();
+	m_ma_feature.clear();
 
 }
 

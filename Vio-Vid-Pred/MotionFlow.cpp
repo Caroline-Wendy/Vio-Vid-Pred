@@ -182,8 +182,8 @@ void MotionFlow::motion_tracking(cv::Mat& pre_frame, cv::Mat& next_frame,
 				/*ºöÂÔ¾µÍ·ÇÐ»»*/
 				if(static_cast<unsigned int>(abs(static_cast<double>(
 					m_point_record - points_new_temp.size()))) < m_point_record/4){
-					points_new.push_back(points_new_temp[i]);
-					points_old.push_back(points_old_temp[i]);
+						points_new.push_back(points_new_temp[i]);
+						points_old.push_back(points_old_temp[i]);
 				}
 				m_point_record = points_new_temp.size();
 			}
