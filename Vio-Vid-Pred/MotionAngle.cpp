@@ -2,14 +2,26 @@
 
 #include "MotionAngle.h"
 
+#define Feature_Length 3
+
 using namespace std;
 using namespace cv;
 
 MotionAngle::MotionAngle(void){
 
-	const unsigned int diff_threshold = 30;
+	/*系统参数*/
 	const unsigned int buffer_length = 4;
+	const unsigned int last = 0;
+
+	/*程序参数*/
+	const unsigned int diff_threshold = 30;
 	const double mhi_duration = 1.0;
+
+	m_buffer_length = buffer_length;
+	m_last = 0;
+
+	m_diff_threshold = diff_threshold;
+	m_mhi_duration = mhi_duration;
 
 	m_src.release();
 	m_dst.release();
@@ -20,38 +32,39 @@ MotionAngle::MotionAngle(void){
 
 	m_buffer.clear();
 	m_storage.clear();
+	m_angle_vector.clear();
+	m_ma_feature.clear();
 
-	/*mhi图像的持续时间*/
-	m_mhi_duration = mhi_duration;
-
-	/*取值0~255, 大于阈值均设为1*/
-	m_diff_threshold = diff_threshold;
-
-	/*缓冲区的长度，大于2*/
-	m_buffer_length = buffer_length;
-
-	/*存储位置*/
-	m_last = 0;
 }
 
 MotionAngle::MotionAngle(const double mhi_duration, 
-	const unsigned int diff_threshold, const unsigned int buffer_length){
+	const unsigned int diff_threshold){
 
-	m_mhi.release();
-	m_orient.release();
-	m_mask.release();
-	m_segmask.release();
+		const unsigned int buffer_length = 4;
+		const unsigned int last = 0;
 
-	m_mhi_duration = mhi_duration;
+		m_buffer_length = buffer_length;
+		m_last = 0;
 
-	/*取值0~255, 大于阈值均设为1*/
-	m_diff_threshold = diff_threshold;
-	m_buffer_length = buffer_length;
+		m_diff_threshold = diff_threshold;
+		m_mhi_duration = mhi_duration;
 
-	m_last = 0;
+		m_src.release();
+		m_dst.release();
+		m_mhi.release();
+		m_orient.release();
+		m_mask.release();
+		m_segmask.release();
+
+		m_buffer.clear();
+		m_storage.clear();
+		m_angle_vector.clear();
+		m_ma_feature.clear();
+
 }
 
 MotionAngle::~MotionAngle(void){
+
 	m_src.release();
 	m_dst.release();
 	m_mhi.release();
@@ -63,7 +76,7 @@ MotionAngle::~MotionAngle(void){
 	m_storage.clear();
 }
 
-void  MotionAngle::update_mhi(const cv::Mat& src, std::vector<double>& angle_vector, bool isPicture){
+void  MotionAngle::motion_angle_feature(const cv::Mat& src, std::vector<double>& ma_feature, bool isPicture){
 
 	/*判断图像*/
 	if(src.empty()){
@@ -72,7 +85,7 @@ void  MotionAngle::update_mhi(const cv::Mat& src, std::vector<double>& angle_vec
 	}
 	src.copyTo(m_src);
 
-	angle_vector.clear();
+	m_angle_vector.clear();
 
 	double timestamp; //时间戳(秒)
 	timestamp = (double)clock()/CLOCKS_PER_SEC;
@@ -121,6 +134,7 @@ void  MotionAngle::update_mhi(const cv::Mat& src, std::vector<double>& angle_vec
 	/*阈值化图像*/
 	cv::threshold(silh, silh, m_diff_threshold, 1, CV_THRESH_BINARY );
 
+
 	/*更新运动历史图像*/
 	cv::updateMotionHistory(silh, m_mhi, timestamp, m_mhi_duration);
 
@@ -134,9 +148,9 @@ void  MotionAngle::update_mhi(const cv::Mat& src, std::vector<double>& angle_vec
 	/*分割运动: 得到运动组件的序列; segmask是运动组件的掩码*/
 	cv::segmentMotion(m_mhi, m_segmask, m_storage, timestamp, MAX_TIME_DELTA );
 
-	cv::Rect comp_rect;	//单个位置
-	bool isWhole(true);	//判断整体
-	double angle;			//角度
+	cv::Rect comp_rect; //单个位置
+	bool isWhole(true); //判断整体
+	double angle; //角度
 
 	for(int i = -1; i < static_cast<int>(m_storage.size()); i++){
 		if(i<0) {
@@ -158,13 +172,19 @@ void  MotionAngle::update_mhi(const cv::Mat& src, std::vector<double>& angle_vec
 		angle = cv::calcGlobalOrientation(orient_roi, mask_roi, mhi_roi, timestamp, m_mhi_duration);
 		angle = 360.0 - angle;  //左上角原点
 
+		angle /= 360;
+		m_angle_vector.push_back(angle);
+
 		if(isPicture){
-			draw_picture(m_src, comp_rect, silh, isWhole, angle);		//画图
+			draw_picture(m_src, comp_rect, silh, isWhole, angle);//画图
 		}
 
-		angle /= 360;
-		angle_vector.push_back(angle);
 	}
+
+	cal_feature();
+	ma_feature = m_ma_feature;
+	m_ma_feature.clear();
+	m_angle_vector.clear();
 
 	if(isPicture){
 		cv::imshow( "Motion Angle", m_src);
@@ -207,4 +227,30 @@ void MotionAngle::draw_picture(cv::Mat& dst, const cv::Rect comp_rect, const cv:
 
 	cv::circle( dst, center, static_cast<int>(magnitude*1.2), color, 2, CV_AA, 0 );
 	cv::line( dst, center, edge_point, color, 2, CV_AA, 0 );
+}
+
+void MotionAngle::cal_feature(){
+
+	for(unsigned int i=0; i<Feature_Length; i++){
+		m_ma_feature.push_back(0);
+	}
+
+	/*全局角度*/
+	m_ma_feature[0] = m_angle_vector[0];
+
+	cv::Mat temp_mat = cv::Mat::zeros(1, m_angle_vector.size()-1, CV_64FC1);
+	cv::Mat mean = cv::Mat::zeros(1, 1, CV_64FC1);
+	cv::Mat stddev = cv::Mat::zeros(1, 1, CV_64FC1);
+	unsigned int temp(0);
+	for(unsigned int i=1; i<m_angle_vector.size(); i++){
+		temp_mat.at<double>(0,i-1) = m_angle_vector[i];
+	}
+	cv::meanStdDev(temp_mat, mean, stddev);
+
+	/*角度均值*/
+	m_ma_feature[1] = mean.at<double>(0,0);
+
+	/*角度标准差*/
+	m_ma_feature[2] = stddev.at<double>(0,0);
+
 }

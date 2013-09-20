@@ -2,6 +2,8 @@
 
 #include "MotionFlow.h"
 
+#define Feature_Length 3
+
 using namespace std;
 using namespace cv;
 
@@ -26,6 +28,8 @@ MotionFlow::MotionFlow(void){
 	m_minDist = minDist;
 
 	m_buffer.clear();
+	m_mf_feature.clear();
+	m_flow_vector.clear();
 
 }
 
@@ -47,7 +51,15 @@ MotionFlow::MotionFlow(int maxCount, double qualityLevel, double minDist){
 
 }
 
-void  MotionFlow::cal_motion_vector(const cv::Mat& src, std::vector<double>& motion_vector, bool isPicture){
+MotionFlow::~MotionFlow(void){
+
+	m_src.release();
+
+	m_buffer.clear();
+
+}
+
+void  MotionFlow::cal_motion_vector(const cv::Mat& src, std::vector<double>& mf_feature, bool isPicture){
 
 	/*检测图像*/
 	if(src.empty()){
@@ -111,8 +123,14 @@ void  MotionFlow::cal_motion_vector(const cv::Mat& src, std::vector<double>& mot
 		temp_x = points_new[i].x-points_old[i].x;
 		temp_y = points_new[i].y-points_old[i].y;
 		temp_result = pow(temp_x, 2.0)+pow(temp_y, 2.0);
-		motion_vector.push_back(temp_result);
+		m_flow_vector.push_back(temp_result);
 	}
+
+	cal_feature();
+	mf_feature = m_mf_feature;
+	m_flow_vector.clear();
+	m_mf_feature.clear();
+
 }
 
 void MotionFlow::motion_tracking(cv::Mat& pre_frame, cv::Mat& next_frame,
@@ -170,4 +188,33 @@ void MotionFlow::motion_tracking(cv::Mat& pre_frame, cv::Mat& next_frame,
 				m_point_record = points_new_temp.size();
 			}
 		}
+}
+
+void MotionFlow::cal_feature(){
+
+	for(unsigned int i=0; i<Feature_Length; i++){
+		m_mf_feature.push_back(0);
+	}
+
+	cv::Mat temp_mat = cv::Mat::zeros(1, m_flow_vector.size(), CV_64FC1);
+	cv::Mat mean = cv::Mat::zeros(1, 1, CV_64FC1);
+	cv::Mat stddev = cv::Mat::zeros(1, 1, CV_64FC1);
+	double sum_fv(0.0);
+
+	unsigned int temp(0);
+	for(unsigned int i=0; i<m_mf_feature.size(); i++){
+		temp_mat.at<double>(0,i) = m_flow_vector[i];
+	}
+	cv::meanStdDev(temp_mat, mean, stddev);
+	sum_fv = cv::sum(temp_mat)[0];
+
+	/*光流向量和*/
+	m_mf_feature[0] = sum_fv;
+
+	/*光流向量和均值*/
+	m_mf_feature[1] = mean.at<double>(0,0);
+
+	/*光流向量和标准差*/
+	m_mf_feature[2] = stddev.at<double>(0,0);
+
 }

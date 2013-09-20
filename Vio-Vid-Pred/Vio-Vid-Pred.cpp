@@ -20,8 +20,8 @@ int main(){
 
 	const std::string file_name = "twinkle.mp4";
 
-	vector<double> angle_vector;	//角度向量
-	vector<double> motion_vector;	//运动向量
+	vector<double> ma_feature;	//角度向量
+	vector<double> mf_feature;	//运动向量
 
 	cv::VideoCapture capture(file_name);
 	if(!capture.isOpened()){
@@ -46,11 +46,13 @@ int main(){
 
 	for(;;){
 		capture >> frame;
+		if(frame.empty()) break;
 		cv::resize(frame, key_frame, key_frame.size(), 0, 0, CV_INTER_AREA);
-		if(key_frame.empty()) break;
-		cMA.update_mhi(key_frame, angle_vector, true);
-		cMF.cal_motion_vector(key_frame, motion_vector, true);
+		cMA.motion_angle_feature(key_frame, ma_feature, true);
+		cMF.cal_motion_vector(key_frame, mf_feature, true);
 	}
+
+	std::cout << "The program is over! Thank you! " << std::endl;
 }
 
 

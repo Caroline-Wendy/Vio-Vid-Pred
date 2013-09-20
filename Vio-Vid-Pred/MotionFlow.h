@@ -14,13 +14,15 @@ class MotionFlow{
 public:
 	MotionFlow(void);
 	MotionFlow(int maxCount, double qualityLevel = 0.01, double minDist = 30);
+	~MotionFlow(void);
 
 public:
-	void cal_motion_vector(const cv::Mat& src, std::vector<double>& motion_vector,  bool isPicture=false);
+	void cal_motion_vector(const cv::Mat& src, std::vector<double>& mf_feature,  bool isPicture=false);
 
 private:
 	void motion_tracking(cv::Mat& pre_frame, cv::Mat& next_frame,
 		vector<Point2f>& points_old, vector<Point2f>& points_new);
+	void cal_feature();
 
 private:
 	cv::Mat m_src; //源图像
@@ -34,4 +36,6 @@ private:
 	double m_qualityLevel; //特征检测的等级
 	double m_minDist; //两特征点之间的最小距离
 
+	std::vector<double> m_mf_feature; //运动光流特征
+	std::vector<double> m_flow_vector; //光流向量
 };
