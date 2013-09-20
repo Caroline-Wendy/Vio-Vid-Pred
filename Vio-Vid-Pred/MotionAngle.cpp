@@ -127,18 +127,6 @@ void  MotionAngle::update_mhi(const cv::Mat& src, std::vector<double>& angle_vec
 	/*转换MHI为8U图像*/
 	cv::convertScaleAbs(m_mhi, m_mask, 255./m_mhi_duration, 
 		(m_mhi_duration - timestamp)*255./m_mhi_duration);
-	//cv::convertScaleAbs(m_mhi, m_mask, 255, 0);
-
-	/*描绘背景(粉色)*/
-	/*if(isPicture){
-		std::vector<cv::Mat> planes;
-		cv::Mat temp = cv::Mat::zeros(m_mask.size(), m_mask.type());
-		planes.push_back(m_mask/2);
-		planes.push_back(temp);
-		planes.push_back(m_mask/2);
-		m_dst.setTo(0);
-		cv::merge(planes, m_dst);
-	}*/
 
 	/*计算运动梯度方向(orient) & 真实方向的掩码(mask)*/
 	cv::calcMotionGradient(m_mhi, m_mask, m_orient, MAX_TIME_DELTA, MIN_TIME_DELTA, 3);
@@ -217,6 +205,6 @@ void MotionAngle::draw_picture(cv::Mat& dst, const cv::Rect comp_rect, const cv:
 	cv::Point edge_point = cv::Point(cvRound( center.x + magnitude*cos(angle*CV_PI/180)),
 		cvRound( center.y - magnitude*sin(angle*CV_PI/180)));
 
-	cv::circle( dst, center, static_cast<int>(magnitude*1.2), color, 1, CV_AA, 0 );
-	cv::line( dst, center, edge_point, color, 1, CV_AA, 0 );
+	cv::circle( dst, center, static_cast<int>(magnitude*1.2), color, 2, CV_AA, 0 );
+	cv::line( dst, center, edge_point, color, 2, CV_AA, 0 );
 }

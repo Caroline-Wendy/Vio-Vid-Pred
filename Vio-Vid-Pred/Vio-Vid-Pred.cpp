@@ -11,7 +11,7 @@
 #include <opencv.hpp>
 
 #include "MotionAngle.h"
-#include "MotionVector.h"
+#include "MotionFlow.h"
 
 using namespace std;
 using namespace cv;
@@ -32,7 +32,7 @@ int main(){
 	cv::Mat frame;
 
 	MotionAngle cMA;
-	MotionVector cMV(50);
+	MotionFlow cMF;
 
 	capture>>frame;
 
@@ -49,7 +49,7 @@ int main(){
 		cv::resize(frame, key_frame, key_frame.size(), 0, 0, CV_INTER_AREA);
 		if(key_frame.empty()) break;
 		cMA.update_mhi(key_frame, angle_vector, true);
-		cMV.cal_motion_vector(key_frame, motion_vector, true);
+		cMF.cal_motion_vector(key_frame, motion_vector, true);
 	}
 }
 
