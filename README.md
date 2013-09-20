@@ -3,8 +3,8 @@ Pro-Pearls
 
 Algorithm
 
-This repository is about the algorithm in the programming pearls.
-The meaning of the file name is "filename_pagenumber".
+This repository is about the violence video prediction.
+The programming environment is VS-2010 + OpenC-V2.43.
 Welcome to give me some comments.
 If you have some ideas, please email me.
 Email: morndragon@126.com
