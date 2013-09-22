@@ -2,8 +2,6 @@
 
 #include "MotionFlow.h"
 
-#define Feature_Length 3
-
 using namespace std;
 using namespace cv;
 
@@ -128,9 +126,11 @@ void  MotionFlow::cal_motion_vector(const cv::Mat& src, std::vector<double>& mf_
 
 	cal_feature();
 	mf_feature = m_mf_feature;
+
 	m_flow_vector.clear();
 	m_mf_feature.clear();
-
+	points_old.clear();
+	points_new.clear();
 }
 
 void MotionFlow::motion_tracking(cv::Mat& pre_frame, cv::Mat& next_frame,
@@ -193,10 +193,6 @@ void MotionFlow::motion_tracking(cv::Mat& pre_frame, cv::Mat& next_frame,
 
 void MotionFlow::cal_feature(){
 
-	for(unsigned int i=0; i<Feature_Length; i++){
-		m_mf_feature.push_back(0);
-	}
-
 	cv::Mat temp_mat = cv::Mat::zeros(1, m_flow_vector.size(), CV_64FC1);
 	cv::Mat mean = cv::Mat::zeros(1, 1, CV_64FC1);
 	cv::Mat stddev = cv::Mat::zeros(1, 1, CV_64FC1);
@@ -210,12 +206,12 @@ void MotionFlow::cal_feature(){
 	sum_fv = cv::sum(temp_mat)[0];
 
 	/*光流向量和*/
-	m_mf_feature[0] = sum_fv;
+	m_mf_feature.push_back(sum_fv);
 
 	/*光流向量和均值*/
-	m_mf_feature[1] = mean.at<double>(0,0);
+	m_mf_feature.push_back(mean.at<double>(0,0));
 
 	/*光流向量和标准差*/
-	m_mf_feature[2] = stddev.at<double>(0,0);
+	m_mf_feature.push_back(stddev.at<double>(0,0));
 
 }

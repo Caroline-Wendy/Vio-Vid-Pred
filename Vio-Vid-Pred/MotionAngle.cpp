@@ -2,8 +2,6 @@
 
 #include "MotionAngle.h"
 
-#define Feature_Length 3
-
 using namespace std;
 using namespace cv;
 
@@ -173,12 +171,13 @@ void  MotionAngle::motion_angle_feature(const cv::Mat& src, std::vector<double>&
 		angle = cv::calcGlobalOrientation(orient_roi, mask_roi, mhi_roi, timestamp, m_mhi_duration);
 		angle = 360.0 - angle;  //左上角原点
 
+		/*使用原始角度画图*/
+		if(isPicture){
+			draw_picture(m_src, comp_rect, silh, isWhole, angle);
+		}
+
 		angle /= 360;
 		m_angle_vector.push_back(angle);
-
-		if(isPicture){
-			draw_picture(m_src, comp_rect, silh, isWhole, angle);//画图
-		}
 
 	}
 
@@ -232,12 +231,8 @@ void MotionAngle::draw_picture(cv::Mat& dst, const cv::Rect comp_rect, const cv:
 
 void MotionAngle::cal_feature(){
 
-	for(unsigned int i=0; i<Feature_Length; i++){
-		m_ma_feature.push_back(0);
-	}
-
 	/*全局角度*/
-	m_ma_feature[0] = m_angle_vector[0];
+	m_ma_feature.push_back(m_angle_vector[0]);
 
 	cv::Mat temp_mat = cv::Mat::zeros(1, m_angle_vector.size()-1, CV_64FC1);
 	cv::Mat mean = cv::Mat::zeros(1, 1, CV_64FC1);
@@ -249,9 +244,9 @@ void MotionAngle::cal_feature(){
 	cv::meanStdDev(temp_mat, mean, stddev);
 
 	/*角度均值*/
-	m_ma_feature[1] = mean.at<double>(0,0);
+	m_ma_feature.push_back(mean.at<double>(0,0));
 
 	/*角度标准差*/
-	m_ma_feature[2] = stddev.at<double>(0,0);
+	m_ma_feature.push_back(stddev.at<double>(0,0));
 
 }

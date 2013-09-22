@@ -12,16 +12,41 @@
 
 #include "MotionAngle.h"
 #include "MotionFlow.h"
+#include "RGBandLAB.h"
 
 using namespace std;
 using namespace cv;
 
+bool write(const std::string file_name, const vector<double> feature){
+
+	std::ofstream ofs(file_name, ios::app);
+
+	if(ofs.fail()){
+		std::cerr << "Sorry, failed to open " << file_name << "! " << std::endl;
+		return false;
+	}
+
+	for(unsigned int i=0; i<feature.size(); i++){
+		ofs << feature[i] << " ";
+	}
+	ofs << endl;
+
+	ofs.close();
+
+	return true;
+
+}
+
 int main(){
 
-	const std::string file_name = "twinkle.mp4";
+	const std::string file_name = "twinkle_0.59.avi";
+	const std::string feature_name = "feature.txt";
 
-	vector<double> ma_feature;	//角度向量
-	vector<double> mf_feature;	//运动向量
+	vector<double> ma_feature; //角度向量3
+	vector<double> mf_feature; //运动向量3
+	vector<double> bl_feature; //颜色向量12
+
+	vector<double> feature;
 
 	cv::VideoCapture capture(file_name);
 	if(!capture.isOpened()){
@@ -33,6 +58,7 @@ int main(){
 
 	MotionAngle cMA;
 	MotionFlow cMF;
+	RGBandLAB cRL;
 
 	capture>>frame;
 
@@ -44,12 +70,16 @@ int main(){
 	cv::Size key_frame_size = cv::Size(640,360);
 	cv::Mat key_frame = cv::Mat::Mat(key_frame_size, CV_32FC3); /*存储缩放帧*/
 
-	for(;;){
+	while(1){
+
 		capture >> frame;
 		if(frame.empty()) break;
 		cv::resize(frame, key_frame, key_frame.size(), 0, 0, CV_INTER_AREA);
 		cMA.motion_angle_feature(key_frame, ma_feature, true);
 		cMF.cal_motion_vector(key_frame, mf_feature, true);
+		cRL.cal_brglab_feature(key_frame, bl_feature);
+
+		//write(feature_name, feature);
 	}
 
 	std::cout << "The program is over! Thank you! " << std::endl;
