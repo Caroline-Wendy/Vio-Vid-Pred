@@ -39,7 +39,7 @@ bool write(const std::string file_name, const vector<double> feature){
 
 int main(){
 
-	const std::string file_name = "twinkle_0.59.avi";
+	const std::string file_name = "violence.avi";
 	const std::string feature_name = "feature.txt";
 
 	vector<double> ma_feature; //½Ç¶ÈÏòÁ¿3
@@ -79,7 +79,19 @@ int main(){
 		cMF.cal_motion_vector(key_frame, mf_feature, true);
 		cRL.cal_brglab_feature(key_frame, bl_feature);
 
-		//write(feature_name, feature);
+		if(ma_feature.empty() || mf_feature.empty() || bl_feature.empty())
+			continue;
+
+		feature.insert(feature.end(), ma_feature.begin(), ma_feature.end());
+		feature.insert(feature.end(), mf_feature.begin(), mf_feature.end());
+		feature.insert(feature.end(), bl_feature.begin(), bl_feature.end());
+
+		ma_feature.clear();
+		mf_feature.clear();
+		bl_feature.clear();
+
+		write(feature_name, feature);
+		feature.clear();
 	}
 
 	std::cout << "The program is over! Thank you! " << std::endl;

@@ -22,7 +22,7 @@ public:
 	bool write(const std::string file_name);
 
 private:
-	cv::Mat m_frame; //è¾“å…¥å›¾åƒ
+	cv::Mat m_frame; //ÊäÈëÍ¼Ïñ
 	std::vector<double> m_color_feature; //1~6, BGR; 7~12, Lab
 	std::string m_file_name;
 

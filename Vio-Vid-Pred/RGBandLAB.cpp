@@ -57,6 +57,8 @@ bool RGBandLAB::cal_brglab_feature(const cv::Mat& frame, std::vector<double>& bl
 
 	bl_feature = m_color_feature;
 
+	m_color_feature.clear();
+
 	return true;
 }
 

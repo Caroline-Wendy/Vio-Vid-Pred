@@ -199,7 +199,7 @@ void MotionFlow::cal_feature(){
 	double sum_fv(0.0);
 
 	unsigned int temp(0);
-	for(unsigned int i=0; i<m_mf_feature.size(); i++){
+	for(unsigned int i=0; i<m_flow_vector.size(); i++){
 		temp_mat.at<double>(0,i) = m_flow_vector[i];
 	}
 	cv::meanStdDev(temp_mat, mean, stddev);
